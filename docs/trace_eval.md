@@ -2,19 +2,19 @@
 
 > **Họ và Tên Học viên:** [Điền Họ và Tên]  
 > **Mã Sinh Viên / Mã Học viên:** [Điền MSSV]  
-> **Chủ đề Lựa chọn:** [Điền tên chủ đề đã chọn từ docs/DANH_SACH_DE_TAI.md hoặc Đề tài Mở]  
+> **Chủ đề Lựa chọn:** [Điền tên chủ đề đã chọn từ docs/DANH_SACH_DE_TAI.md hoặc Đề tài Mở]
 
 ---
 
 ## 1. BẢNG CHẤM ĐIỂM AGENTIC FIT SCORING MATRIX (ĐÁNH GIÁ CHỦ ĐỀ)
 
-| Tiêu chí Đánh giá | Mức độ (1 - 5) | Giải trình chi tiết lý do chọn điểm |
-| :--- | :---: | :--- |
-| **1. Multi-step Reasoning** | / 5 | Bài toán có yêu cầu chia nhỏ nhiều bước suy luận nối tiếp nhau không? |
-| **2. Tool Interaction** | / 5 | Hệ thống có cần kết nối với MCP Server / Cơ sở dữ liệu bên ngoài không? |
-| **3. Dynamic Decision** | / 5 | Bước tiếp theo có phụ thuộc vào kết quả quan sát bước trước không? |
-| **4. Long Horizon Goal** | / 5 | Hệ thống có phải giữ mục tiêu xuyên suốt qua nhiều lượt xử lý không? |
-| **TỔNG ĐIỂM AGENTIC FIT** | **/ 20** | *Nếu tổng điểm > 12/20: Bài toán rất phù hợp triển khai Agentic System.* |
+| Tiêu chí Đánh giá           | Mức độ (1 - 5) | Giải trình chi tiết lý do chọn điểm                                                                                                                                                                                      |
+| :-------------------------- | :------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1. Multi-step Reasoning** |     3 / 5      | Bài toán cần tách nhỏ việc dặt phòng/thiết bị ra thành kiểm tra thông tin đặt, kiểm tra phòng/thiết bị được đặt có available không rồi mới đặt phòng/thiết bị                                                            |
+| **2. Tool Interaction**     |     3 / 5      | Hệ thống cần kết nối với database quản lí của phòng họp/thiết bị để biết phòng/thiết bị nào phù hợp và có available không cũng như cần kết nối đến tool đặt phòng/thiết bị                                               |
+| **3. Dynamic Decision**     |     4 / 5      | Phụ thuộc rất nhiều vào kết quả bước trước, nếu thông tin không hợp lệ thì không kiểm tra được trạng thái phòng/thiết bị và nếu phòng/thiết bị không available thì không thể đặt                                         |
+| **4. Long Horizon Goal**    |     3 / 5      | Hệ thống cần nắm được thông tin yêu cầu của người dùng vì những yêu cầu sẽ được người dùng thêm vào để tìm được phòng phù hợp nên cần nhớ những yêu cầu trước mà người dùng đã input để đưa ra câu trả lời chính xác hơn |
+| **TỔNG ĐIỂM AGENTIC FIT**   |   13/ 20\*\*   | _Nếu tổng điểm > 12/20: Bài toán rất phù hợp triển khai Agentic System._                                                                                                                                                 |
 
 ---
 
@@ -25,25 +25,38 @@
 Dán 1 đoạn trích xuất log tiêu biểu từ file `docs/trace_waterfall.json` sinh ra từ phản hồi LLM API thật:
 
 ```json
-[
+{
   {
     "step": 1,
+    "query": "Kiểm tra xem phòng họp P302 có còn trống vào khung giờ từ 14:00 đến 16:00 chiều nay không?",
     "action_type": "TOOL_EXECUTION",
-    "tool_name": "academic_query",
+    "tool_name": "check_room_availability",
     "arguments": {
-      "student_id": "SV2026001"
+      "room_id": "P302",
+      "start_time": "14:00",
+      "end_time": "16:00",
+      "date": "hôm nay"
     },
     "observation": {
       "status": "SUCCESS",
-      "student_id": "SV2026001",
-      "data": {
-        "full_name": "Nguyễn Văn An",
-        "gpa": 3.85
-      }
+      "room_id": "P302",
+      "available": true,
+      "start_time": "14:00",
+      "end_time": "16:00",
+      "date": "hôm nay",
+      "message": "Phòng P302 còn trống từ 14:00 đến 16:00 vào ngày hôm nay."
     },
-    "latency_ms": 120.5
+    "latency_ms": 1511.07
+  },
+  {
+    "step": 2,
+    "query": "Kiểm tra xem phòng họp P302 có còn trống vào khung giờ từ 14:00 đến 16:00 chiều nay không?",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Tổng hợp kết quả từ MCP Server thành công.",
+    "output": "Phòng P302 còn trống từ 14:00 đến 16:00 vào ngày hôm nay.",
+    "latency_ms": 10.0
   }
-]
+}
 ```
 
 ---
@@ -51,8 +64,8 @@ Dán 1 đoạn trích xuất log tiêu biểu từ file `docs/trace_waterfall.js
 ## 3. TỔNG KẾT KẾT QUẢ NGHIỆM THU & NỘP BÀI
 
 - [ ] Đã điền API Key thật trong `.env` và xác nhận Agent chạy mượt mà trên LLM API thật (Gemini/OpenAI).
-- **Tổng số Test Cases đã chạy thành công:** ___ / 5 test cases.
-- **Số lượt gọi Tool qua MCP Server chính xác:** ___ lượt.
+- **Tổng số Test Cases đã chạy thành công:** 5 / 5 test cases.
+- **Số lượt gọi Tool qua MCP Server chính xác:** 5 lượt.
 - **Kết quả đẩy Repo nộp bài:** [ ] Đã Commit và Push mã nguồn thành công lên GitHub cá nhân.
 
 ---

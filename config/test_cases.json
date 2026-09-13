@@ -1,0 +1,37 @@
+[
+  {
+    "id": "TC01",
+    "type": "direct_query",
+    "question": "Chào bạn, quy định chung về thời gian mượn phòng họp và thiết bị ở đây như thế nào?",
+    "expected_behavior": "Agent trả lời trực tiếp từ System Prompt/Knowledge base về khung giờ, thời gian mượn tối đa và quy định chung, không cần gọi bất kỳ Tool nào.",
+    "complexity": "Low"
+  },
+  {
+    "id": "TC02",
+    "type": "single_tool_query",
+    "question": "Kiểm tra xem phòng họp P302 có còn trống vào khung giờ từ 14:00 đến 16:00 chiều nay không?",
+    "expected_behavior": "Agent nhận diện ý định kiểm tra tình trạng phòng, tự động phát sinh Tool Call 'check_room_availability' với tham số room_id='P302', start_time='14:00', end_time='16:00', date='hôm nay'.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC03",
+    "type": "appointment_booking",
+    "question": "Đặt giúp tôi phòng hội thảo A101 và 2 micro không dây cho nhóm 10 người vào lúc 09:00 - 11:00 sáng mai nhé.",
+    "expected_behavior": "Agent tự động phát sinh Tool Call 'book_room_and_equipment' với đầy đủ tham số (room_id='A101', equipments=[{'type': 'wireless_mic', 'quantity': 2}], start_time='09:00', end_time='11:00', capacity=10).",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC04",
+    "type": "multi_step_reasoning",
+    "question": "Tôi cần tổ chức workshop vào 15:00 và kết thúc vào 17:00 chiều thứ Sáu tuần này cho 30 người cần kèm theo máy chiếu. Hãy tìm phòng phù hợp còn trống rồi đặt luôn kèm máy chiếu giúp tôi.",
+    "expected_behavior": "Agent thực hiện chuỗi ReAct đa bước: 1. Gọi 'find_available_rooms' (sức chứa >= 30, slot chiều thứ Sáu) -> 2. Kiểm tra tồn kho máy chiếu qua 'check_equipment_availability' -> 3. Gọi 'book_room_and_equipment' cho phòng và thiết bị đã chọn -> 4. Phản hồi xác nhận chi tiết mã đặt chỗ cho người dùng.",
+    "complexity": "High"
+  },
+  {
+    "id": "TC05",
+    "type": "edge_case_handling",
+    "question": "Tôi muốn mượn thiết bị có mã TB-999999 cho buổi thuyết trình sáng mai.",
+    "expected_behavior": "Agent gọi Tool 'check_equipment_details' với id='TB-999999', nhận kết quả NOT_FOUND/INVALID_ID từ Tool, sau đó đưa ra thông báo lịch sự rằng mã thiết bị không tồn tại và đề xuất hỗ trợ tra cứu danh mục thiết bị hiện có.",
+    "complexity": "Medium"
+  }
+]
